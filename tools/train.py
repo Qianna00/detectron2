@@ -25,7 +25,6 @@ import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
-from detectron2.data.datasets import register_coco_instances
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
 from detectron2.evaluation import (
     CityscapesInstanceEvaluator,
@@ -124,9 +123,6 @@ def setup(args):
     cfg = get_cfg()
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
-    cfg.OUTPUT_DIR = "/root/data/zq/unsup_det/det"
-    cfg.DATASETS.TRAIN = ('smd_train', 'smd_val')
-    cfg.DATASETS.TEST = ('smd_test',)
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
@@ -161,15 +157,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    register_coco_instances("smd_train", {}, "/root/data/zq/data/SMD/annotations/Training/SMD_VIS_skip_2_train.json",
-                            "/root/data/zq/data/SMD/train")
-    register_coco_instances("smd_val", {}, "/root/data/zq/data/SMD/annotations/Training/SMD_VIS_skip_2_val.json",
-                            "/root/data/zq/data/SMD/train")
-    register_coco_instances("smd_test", {}, "/root/data/zq/data/SMD/annotations/Test/SMD_VIS_skip_2.json",
-                            "/root/data/zq/data/SMD/test")
-    MetadataCatalog.get("smd_train").thing_classes = ["object"]
-    MetadataCatalog.get("smd_val").thing_classes = ["object"]
-    MetadataCatalog.get("smd_test").thing_classes = ["object"]
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
     launch(
