@@ -212,7 +212,7 @@ class SMDEvaluator(DatasetEvaluator):
 
                 # TODO(eomoos): change cache arrays type to numpy array so you can easily add cache to target array!
                 # eval complete dataset
-                tp_c, fp_c, fn_c, m_iou, max_conf = eval_with_conf(bboxes, gt[im], t, conf)
+                tp_c, fp_c, fn_c, m_iou = eval_with_conf(bboxes, gt[im], t, conf)
 
                 # calculate sums of different size tp(conf), fp(conf), fn(conf), m_iou(conf)
                 tp_sum = [tp_sum[i] + tp_c[i] for i in range(len(tp_c))]
@@ -235,7 +235,6 @@ class SMDEvaluator(DatasetEvaluator):
                 ev_json._eval['rec'][t].append(recall(tp_sum[i], fn_sum[i]))
                 ev_json._eval['f-score'][t].append(f_measure(precision(tp_sum[i], fp_sum[i]), recall(tp_sum[i], fn_sum[i])))
 
-        ev_json._max_conf = max_conf
         print(ev_json._eval)
 
         # ev_json._save_as_json(output_dir)
