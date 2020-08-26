@@ -139,7 +139,6 @@ class COCOeval_opt(COCOeval):
             if ap == 1:
                 # dimension of precision: [TxRxKxAxM]
                 s = self.eval['precision']
-                print("precision:", s)
                 # IoU
                 if iouThr is not None:
                     t = np.where(iouThr == p.iouThrs)[0]
