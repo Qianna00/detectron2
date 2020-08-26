@@ -168,12 +168,6 @@ def eval_with_conf(boxes_conf, gt, thrs, conf, calc_conf_mat=False, conf_mat=np.
     fp = []
     fn = []
     m_iou = []
-    max_conf = [box[0][-1] for box in boxes_conf]
-
-    if not max_conf:
-        max_conf = 0
-    else:
-        max_conf = max(max_conf)
 
     for idx, c in enumerate(conf):
         # copy boxes for further manipulations
