@@ -708,7 +708,7 @@ class EvalSave:
     _conf_stride = 0
     _eval = {'prec': {}, 'rec': {}, 'm_iou': {}, 'f-score':{}}
 
-    def __init__(self, thrs, conf_stride=0.01):
+    def __init__(self, thrs, conf_stride=1):
         for val in thrs:
             self._eval['prec'].update({val: []})
             self._eval['rec'].update({val: []})
