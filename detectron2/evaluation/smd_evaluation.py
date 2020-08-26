@@ -172,7 +172,7 @@ class SMDEvaluator(DatasetEvaluator):
 
         gt = get_gt(dataset)
 
-        imgs = dataset.COCO.imgs
+        imgs = dataset.imgs
 
         num_imgs = len(imgs)
 
