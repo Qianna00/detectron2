@@ -179,7 +179,7 @@ class SMDEvaluator(DatasetEvaluator):
         thrs = [0.5, 0.3]
 
         ev_json = EvalSave(thrs)
-        ev_json._set_dataset_name(dataset.name)
+        ev_json._set_dataset_name('smd')
 
         res_dict = {}
         [res_dict.update({val: {'TP': 0, 'FP': 0, 'FN': 0}}) for val in thrs]
