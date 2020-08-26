@@ -89,7 +89,7 @@ class COCOeval_opt(COCOeval):
         )
         self._evalImgs = None
 
-        self.params.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
+        self.params.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
 
         self._paramsEval = copy.deepcopy(self.params)
         toc = time.time()
