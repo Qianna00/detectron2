@@ -137,10 +137,10 @@ class SMDEvaluator(DatasetEvaluator):
                 return {}
         else:
             predictions = self._predictions
-        print("predictions:", predictions)
+        # preictions: list of dict [{'image_id', 'instances'(list of dict [{'image_id', 'category_id', bbox, score}])}]
 
         if len(predictions) == 0:
-            self._logger.warning("[COCOEvaluator] Did not receive valid predictions.")
+            self._logger.warning("[SMDEvaluator] Did not receive valid predictions.")
             return {}
 
         if self._output_dir:
@@ -160,9 +160,15 @@ class SMDEvaluator(DatasetEvaluator):
 
     def _eval_predictions_others(self, dataset, predictions):
         self._logger.info("Computing recall, precision and f-score of predictions ...")
-        all_boxes = predictions
-        num_classes = 1
-        res = []
+        all_bboxes = []
+        num_preds = 0
+        for preds_per_img in predictions:
+            bboxes_per_img = []
+            for pred in preds_per_img['instances']:
+                bbox = pred['bbox']
+                bboxes_per_img.append(bbox)
+            all_bboxes.append(bboxes_per_img)
+            num_preds = num_preds + len(bboxes_per_img)
 
         gt = get_gt(dataset)
 
@@ -178,11 +184,8 @@ class SMDEvaluator(DatasetEvaluator):
         res_dict = {}
         [res_dict.update({val: {'TP': 0, 'FP': 0, 'FN': 0}}) for val in thrs]
 
-        l_limit = 2500
-        u_limit = 50 * 10 ** 3
+        conf = [c * ev_json._conf_stride for c in range(int(1 / ev_json._conf_stride) + 1)]
 
-        # create confusion matrix only for 10c datasets
-        calc_cfn_matrix = True if "10c" in dataset.name else False
 
         for t in thrs:
             # intialize caches for different tp, fp, fn and m_iou values
@@ -191,82 +194,25 @@ class SMDEvaluator(DatasetEvaluator):
             fn_sum = [0] * int((1 / ev_json._conf_stride + 1))
             m_iou_sum = [0] * int((1 / ev_json._conf_stride + 1))
 
-            tp_sum_low = [0] * int((1 / ev_json._conf_stride + 1))
-            fp_sum_low = [0] * int((1 / ev_json._conf_stride + 1))
-            fn_sum_low = [0] * int((1 / ev_json._conf_stride + 1))
-            m_iou_sum_low = [0] * int((1 / ev_json._conf_stride + 1))
-
-            tp_sum_mid = [0] * int((1 / ev_json._conf_stride + 1))
-            fp_sum_mid = [0] * int((1 / ev_json._conf_stride + 1))
-            fn_sum_mid = [0] * int((1 / ev_json._conf_stride + 1))
-            m_iou_sum_mid = [0] * int((1 / ev_json._conf_stride + 1))
-
-            tp_sum_high = [0] * int((1 / ev_json._conf_stride + 1))
-            fp_sum_high = [0] * int((1 / ev_json._conf_stride + 1))
-            fn_sum_high = [0] * int((1 / ev_json._conf_stride + 1))
-            m_iou_sum_high = [0] * int((1 / ev_json._conf_stride + 1))
-
-            conf_mat = [np.zeros((num_classes, num_classes)).astype(np.uint32),
-                        np.zeros((num_classes, num_classes)).astype(np.uint32)]
-
-            classification_error = [np.array([0]), np.array([0])]
-
             for im in range(num_imgs):
                 sys.stdout.write("\rimage {:d} of {:d} - thrs = {:0.1f}".format(im + 1, num_imgs, t))
                 # sort out empty boxes
-                n_e_boxes = []
-                for idx, b in enumerate(all_boxes[1:]):
+                """n_e_boxes = []
+                for idx, b in enumerate(all_bboxes):
                     if b[im].any():
                         for i in range(len(b[im])):
-                            n_e_boxes.append([b[im][i].tolist(), idx + 1])
+                            n_e_boxes.append([b[im][i].tolist(), idx + 1])"""
 
-                boxes = get_image_boxes(dataset, all_boxes, im)
+                # bboxes = get_image_boxes(dataset, all_bboxes, im)
+                bboxes = all_bboxes[im]
 
-                for box in n_e_boxes:
+                """for box in n_e_boxes:
                     box[0][2] = box[0][2] - box[0][0]
-                    box[0][3] = box[0][3] - box[0][1]
-
-                r_end = int((1 + ev_json._conf_stride) / ev_json._conf_stride)
-                conf = [c * ev_json._conf_stride for c in range(int(1 / ev_json._conf_stride) + 1)]
-
-                # as coco forces you to provide a label, empty images are detected by bounding boxes containing only a label
-                # validation case: empty frames were left emtpy and didn't get a label
-                if not gt[im]:
-                    gt_ev = []
-                else:
-                    # test case: there's no bounding box but a label to tell the network that there's no object
-                    if len(gt[im][0]) == 1:
-                        gt_ev = []
-                    else:
-                        gt_ev = gt[im]
-
-                # prepare for size dependant evaluation
-                gt_low = []
-                gt_mid = []
-                gt_high = []
-                for g in gt_ev:
-                    if g[2] * g[3] <= l_limit:
-                        gt_low.append(g)
-                    elif g[2] * g[3] > u_limit:
-                        gt_high.append(g)
-                    else:
-                        gt_mid.append(g)
+                    box[0][3] = box[0][3] - box[0][1]"""
 
                 # TODO(eomoos): change cache arrays type to numpy array so you can easily add cache to target array!
                 # eval complete dataset
-                if calc_cfn_matrix:
-                    tp_c, fp_c, fn_c, m_iou, max_conf = eval_with_conf(n_e_boxes, gt_ev, t, conf,
-                                                                                  calc_conf_mat=calc_cfn_matrix,
-                                                                                  conf_mat=conf_mat,
-                                                                                  correct_pred=classification_error)
-                else:
-                    tp_c, fp_c, fn_c, m_iou, max_conf = eval_with_conf(n_e_boxes, gt_ev, t, conf)
-                # eval only with tiny objects - A <= 2500
-                tp_c_low, fp_c_low, fn_c_low, m_iou_low, _ = eval_with_conf(n_e_boxes, gt_low, t, conf)
-                # eval only with medium size objects - 2500 < A < 50,000
-                tp_c_mid, fp_c_mid, fn_c_mid, m_iou_mid, _ = eval_with_conf(n_e_boxes, gt_mid, t, conf)
-                # eval only with huge objects - A >= 50000
-                tp_c_high, fp_c_high, fn_c_high, m_iou_high, _ = eval_with_conf(n_e_boxes, gt_high, t, conf)
+                tp_c, fp_c, fn_c, m_iou, max_conf = eval_with_conf(bboxes, gt[im], t, conf)
 
                 # calculate sums of different size tp(conf), fp(conf), fn(conf), m_iou(conf)
                 tp_sum = [tp_sum[i] + tp_c[i] for i in range(len(tp_c))]
@@ -274,75 +220,23 @@ class SMDEvaluator(DatasetEvaluator):
                 fn_sum = [fn_sum[i] + fn_c[i] for i in range(len(fn_c))]
                 m_iou_sum = [m_iou_sum[i] + m_iou[i] for i in range(len(m_iou))]
 
-                tp_sum_low = [tp_sum_low[i] + tp_c_low[i] for i in range(len(tp_c_low))]
-                fn_sum_low = [fn_sum_low[i] + fn_c_low[i] for i in range(len(fn_c_low))]
-                m_iou_sum_low = [m_iou_sum_low[i] + m_iou_low[i] for i in range(len(m_iou_low))]
-
-                tp_sum_mid = [tp_sum_mid[i] + tp_c_mid[i] for i in range(len(tp_c_mid))]
-                fn_sum_mid = [fn_sum_mid[i] + fn_c_mid[i] for i in range(len(fn_c_mid))]
-                m_iou_sum_mid = [m_iou_sum_mid[i] + m_iou_mid[i] for i in range(len(m_iou_mid))]
-
-                tp_sum_high = [tp_sum_high[i] + tp_c_high[i] for i in range(len(tp_c_high))]
-                fn_sum_high = [fn_sum_high[i] + fn_c_high[i] for i in range(len(fn_c_high))]
-                m_iou_sum_high = [m_iou_sum_high[i] + m_iou_high[i] for i in range(len(m_iou_high))]
-
             sys.stdout.write("\n")
             add_to_res_dict(res_dict, tp_sum[0], fp_sum[0], fn_sum[0], t)
 
-            # calc mean iou's for different evaluation scales
+            # calc mean iou
             for i in range(len(tp_sum)):
                 if tp_sum[i] > 0:
                     ev_json._eval['m_iou'][t].append(m_iou_sum[i] / tp_sum[i])
                 else:
                     ev_json._eval['m_iou'][t].append(0)
 
-            for i in range(len(tp_sum_low)):
-                if tp_sum_low[i] > 0:
-                    ev_json._eval['m_iou_low'][t].append(m_iou_sum_low[i] / tp_sum_low[i])
-                else:
-                    ev_json._eval['m_iou_low'][t].append(0)
-
-            for i in range(len(tp_sum_mid)):
-                if tp_sum_mid[i] > 0:
-                    ev_json._eval['m_iou_mid'][t].append(m_iou_sum_mid[i] / tp_sum_mid[i])
-                else:
-                    ev_json._eval['m_iou_mid'][t].append(0)
-
-            for i in range(len(tp_sum_high)):
-                if tp_sum_high[i] > 0:
-                    ev_json._eval['m_iou_high'][t].append(m_iou_sum_high[i] / tp_sum_high[i])
-                else:
-                    ev_json._eval['m_iou_high'][t].append(0)
-
             for i in range(len(tp_sum)):
                 ev_json._eval['prec'][t].append(precision(tp_sum[i], fp_sum[i]))
                 ev_json._eval['rec'][t].append(recall(tp_sum[i], fn_sum[i]))
-
-                ev_json._eval['rec_low'][t].append(recall(tp_sum_low[i], fn_sum_low[i]))
-
-                ev_json._eval['rec_mid'][t].append(recall(tp_sum_mid[i], fn_sum_mid[i]))
-
-                ev_json._eval['rec_high'][t].append(recall(tp_sum_high[i], fn_sum_high[i]))
-
-            flat_conf_mat = conf_mat[0].flatten()
-            num_tp_dets = sum(flat_conf_mat.tolist())
-            cls_acc = classification_accuracy(classification_error[0][0], num_tp_dets)
-            print(cls_acc)
-
-            ev_json._eval['conf_mat'][t].append([flat_conf_mat.tolist(), num_classes])
-            ev_json._eval['classification_error'][t].append(
-                [cls_acc])
-
-            flat_conf_mat = conf_mat[1].flatten()
-            num_tp_dets = sum(flat_conf_mat.tolist())
-            cls_acc = classification_accuracy(classification_error[0][0], num_tp_dets)
-            print(cls_acc)
-
-            ev_json._eval['conf_mat'][t].append([flat_conf_mat.tolist(), num_classes])
-            ev_json._eval['classification_error'][t].append(
-                [cls_acc])
+                ev_json._eval['f-score'][t].append(f_measure(precision(tp_sum[i], fp_sum[i]), recall(tp_sum[i], fn_sum[i])))
 
         ev_json._max_conf = max_conf
+        print(ev_json._eval)
 
         # ev_json._save_as_json(output_dir)
 
@@ -743,8 +637,8 @@ def get_gt(dataset):
     for index, _ in enumerate(dataset.COCO.anns):
         im_id = dataset.COCO.anns[index]['image_id']
         bb = dataset.COCO.anns[index]['bbox']
-        label = dataset.COCO.cats[dataset.COCO.anns[index]['category_id']]['name']
-        bb.append(label)
+        # label = dataset.COCO.cats[dataset.COCO.anns[index]['category_id']]['name']
+        # bb.append(label)
         gt[im_id].append(bb)
 
     return gt
@@ -813,27 +707,14 @@ class EvalSave:
     _dataset_name = ''
     _max_conf = "N.A."
     _conf_stride = 0
-    _eval = {'prec': {}, 'rec': {}, 'prec_low': {}, 'rec_low': {}, 'prec_mid': {}, 'rec_mid': {}, 'prec_high': {},
-             'rec_high': {},
-             'm_iou': {}, 'm_iou_low': {}, 'm_iou_mid': {}, 'm_iou_high': {}, 'conf_mat': {},
-             'classification_error': {}}
+    _eval = {'prec': {}, 'rec': {}, 'm_iou': {}, 'f-score':{}}
 
     def __init__(self, thrs, conf_stride=0.01):
         for val in thrs:
             self._eval['prec'].update({val: []})
             self._eval['rec'].update({val: []})
-            self._eval['prec_low'].update({val: []})
-            self._eval['rec_low'].update({val: []})
-            self._eval['prec_mid'].update({val: []})
-            self._eval['rec_mid'].update({val: []})
-            self._eval['prec_high'].update({val: []})
-            self._eval['rec_high'].update({val: []})
             self._eval['m_iou'].update({val: []})
-            self._eval['m_iou_low'].update({val: []})
-            self._eval['m_iou_mid'].update({val: []})
-            self._eval['m_iou_high'].update({val: []})
-            self._eval['conf_mat'].update({val: []})
-            self._eval['classification_error'].update({val: []})
+            self._eval['f-score'].update({val:[]})
             self._conf_stride = conf_stride
             self._max_conf = "N.A."
         self._set_dataset_name()
@@ -843,15 +724,9 @@ class EvalSave:
 
         return 0
 
-    def _update_eval(self, prec, rec, prec_low, rec_low, prec_mid, rec_mid, prec_high, rec_high, conf, max_conf="N.A."):
+    def _update_eval(self, prec, rec, conf, max_conf="N.A."):
         self._eval['prec'][conf] = prec
         self._eval['rec'][conf] = rec
-        self._eval['prec_low'][conf] = prec_low
-        self._eval['rec_low'][conf] = rec_low
-        self._eval['prec_mid'][conf] = prec_mid
-        self._eval['rec_mid'][conf] = rec_mid
-        self._eval['prec_high'][conf] = prec_high
-        self._eval['rec_high'][conf] = rec_high
         self._max_conf = max_conf
 
         return 0

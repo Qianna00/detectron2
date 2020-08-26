@@ -95,7 +95,7 @@ def dect_is(bb_in, gt, thrs, conf_mat=np.array([]), correct_pred=0):
 
     for grtr in range(len(gt)):
         for det in range(len(bb)):
-            inter, A, B = iou(bb[det][0], gt[grtr])
+            inter, A, B = iou(bb[det], gt[grtr])
             if (inter > thrs) and (inter > inter_old):
                 inter_old = inter
                 index = det
