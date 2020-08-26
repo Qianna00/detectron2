@@ -174,11 +174,11 @@ def eval_with_conf(boxes_conf, gt, thrs, conf, calc_conf_mat=False, conf_mat=np.
         boxes = [boxes_conf[j] for j in range(len(boxes_conf))]
 
         # loop through boxes
-        killed = 0
+        """killed = 0
         for i in range(len(boxes)):
             if boxes[i-killed][0][-1] < c:
                 boxes.remove(boxes[i-killed])
-                killed += 1
+                killed += 1"""
 
         if calc_conf_mat and (c == 0.5 or c == 0.75):
             idx = 0 if c == 0.5 else 1
@@ -191,7 +191,7 @@ def eval_with_conf(boxes_conf, gt, thrs, conf, calc_conf_mat=False, conf_mat=np.
         fn.append(sol[2])
         m_iou.append(sol[3])
 
-    return tp, fp, fn, m_iou, max_conf
+    return tp, fp, fn, m_iou
 
 
 def determine_p1(prec_rec):
