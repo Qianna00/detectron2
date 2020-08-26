@@ -634,9 +634,9 @@ def get_gt(dataset):
     for i in range(len(dataset.imgs)):
         gt.append([])
 
-    for index, _ in enumerate(dataset.COCO.anns):
-        im_id = dataset.COCO.anns[index]['image_id']
-        bb = dataset.COCO.anns[index]['bbox']
+    for index, _ in enumerate(dataset.anns):
+        im_id = dataset.anns[index]['image_id']
+        bb = dataset.anns[index]['bbox']
         # label = dataset.COCO.cats[dataset.COCO.anns[index]['category_id']]['name']
         # bb.append(label)
         gt[im_id].append(bb)
