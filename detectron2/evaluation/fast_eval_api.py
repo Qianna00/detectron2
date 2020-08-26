@@ -83,6 +83,8 @@ class COCOeval_opt(COCOeval):
             ground_truth_instances = [[[o for c in i for o in c]] for i in ground_truth_instances]
             detected_instances = [[[o for c in i for o in c]] for i in detected_instances]
 
+        p.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
+
         # Call C++ implementation of self.evaluateImgs()
         self._evalImgs_cpp = _C.COCOevalEvaluateImages(
             p.areaRng, maxDet, p.iouThrs, ious, ground_truth_instances, detected_instances
@@ -92,7 +94,6 @@ class COCOeval_opt(COCOeval):
         self.params.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
 
         self._paramsEval = copy.deepcopy(self.params)
-        print(self._paramsEval)
         toc = time.time()
         print("COCOeval_opt.evaluate() finished in {:0.2f} seconds.".format(toc - tic))
         # >>>> End of code differences with original COCO API
@@ -108,8 +109,6 @@ class COCOeval_opt(COCOeval):
             print("Please run evaluate() first")
 
         self.eval = _C.COCOevalAccumulate(self._paramsEval, self._evalImgs_cpp)
-
-        print("counts:", self.eval['counts'])
 
         # recall is num_iou_thresholds X num_categories X num_area_ranges X num_max_detections
         self.eval["recall"] = np.array(self.eval["recall"]).reshape(
