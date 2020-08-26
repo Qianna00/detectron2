@@ -162,7 +162,6 @@ class COCOEvaluator(DatasetEvaluator):
         """
         self._logger.info("Preparing results for COCO format ...")
         coco_results = list(itertools.chain(*[x["instances"] for x in predictions]))
-        print("coco_results:", coco_results)
 
         # unmap the category ids for COCO
         if hasattr(self._metadata, "thing_dataset_id_to_contiguous_id"):
