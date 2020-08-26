@@ -108,6 +108,8 @@ class COCOeval_opt(COCOeval):
 
         self.eval = _C.COCOevalAccumulate(self._paramsEval, self._evalImgs_cpp)
 
+        print("counts:", self.eval['counts'])
+
         # recall is num_iou_thresholds X num_categories X num_area_ranges X num_max_detections
         self.eval["recall"] = np.array(self.eval["recall"]).reshape(
             self.eval["counts"][:1] + self.eval["counts"][2:]
