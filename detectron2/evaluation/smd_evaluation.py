@@ -158,7 +158,7 @@ class SMDEvaluator(DatasetEvaluator):
         # Copy so the caller can do whatever with results
         return copy.deepcopy(self._results)
 
-    def _eval_predictions_others(self, dataset, predictions):
+    def _eval_predictions_others(self, dataset, predictions, num_classes=2):
         self._logger.info("Computing recall, precision and f-score of predictions ...")
         all_bboxes = []
         num_preds = 0
@@ -166,6 +166,7 @@ class SMDEvaluator(DatasetEvaluator):
             bboxes_per_img = []
             for pred in preds_per_img['instances']:
                 bbox = pred['bbox']
+                # bbox.append(pred['score'])
                 bboxes_per_img.append(bbox)
             all_bboxes.append(bboxes_per_img)
             num_preds = num_preds + len(bboxes_per_img)
@@ -186,13 +187,15 @@ class SMDEvaluator(DatasetEvaluator):
 
         conf = [c * ev_json._conf_stride for c in range(int(1 / ev_json._conf_stride) + 1)]
 
-
         for t in thrs:
             # intialize caches for different tp, fp, fn and m_iou values
             tp_sum = [0] * int((1 / ev_json._conf_stride + 1))
             fp_sum = [0] * int((1 / ev_json._conf_stride + 1))
             fn_sum = [0] * int((1 / ev_json._conf_stride + 1))
             m_iou_sum = [0] * int((1 / ev_json._conf_stride + 1))
+
+            conf_mat = [np.zeros((num_classes, num_classes)).astype(np.uint32),
+                        np.zeros((num_classes, num_classes)).astype(np.uint32)]
 
             for im in range(num_imgs):
                 sys.stdout.write("\rimage {:d} of {:d} - thrs = {:0.1f}".format(im + 1, num_imgs, t))
@@ -251,6 +254,7 @@ class SMDEvaluator(DatasetEvaluator):
         """
         self._logger.info("Preparing results for COCO format ...")
         coco_results = list(itertools.chain(*[x["instances"] for x in predictions]))
+        print("coco_results:", coco_results)
 
         # unmap the category ids for COCO
         if hasattr(self._metadata, "thing_dataset_id_to_contiguous_id"):
