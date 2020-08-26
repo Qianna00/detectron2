@@ -92,6 +92,7 @@ class COCOeval_opt(COCOeval):
         self.params.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
 
         self._paramsEval = copy.deepcopy(self.params)
+        print(self._paramsEval)
         toc = time.time()
         print("COCOeval_opt.evaluate() finished in {:0.2f} seconds.".format(toc - tic))
         # >>>> End of code differences with original COCO API
