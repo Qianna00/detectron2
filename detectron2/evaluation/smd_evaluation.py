@@ -631,7 +631,7 @@ def _evaluate_predictions_on_coco(
 
 def get_gt(dataset):
     gt = []
-    for i in range(len(dataset.COCO.imgs)):
+    for i in range(len(dataset.imgs)):
         gt.append([])
 
     for index, _ in enumerate(dataset.COCO.anns):
