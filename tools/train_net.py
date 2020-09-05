@@ -123,6 +123,7 @@ def setup(args):
     cfg = get_cfg()
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
+    cfg.OUTPUT_DIR = "/root/data/zq/smd_det/coco"
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
