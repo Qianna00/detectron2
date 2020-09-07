@@ -83,7 +83,7 @@ class COCOeval_opt(COCOeval):
             ground_truth_instances = [[[o for c in i for o in c]] for i in ground_truth_instances]
             detected_instances = [[[o for c in i for o in c]] for i in detected_instances]
 
-        p.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
+        p.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
 
         # Call C++ implementation of self.evaluateImgs()
         self._evalImgs_cpp = _C.COCOevalEvaluateImages(
@@ -91,7 +91,7 @@ class COCOeval_opt(COCOeval):
         )
         self._evalImgs = None
 
-        self.params.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
+        self.params.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
 
         self._paramsEval = copy.deepcopy(self.params)
         toc = time.time()
@@ -164,12 +164,12 @@ class COCOeval_opt(COCOeval):
             stats = np.zeros((14,))
             stats[0] = _summarize(1)
             stats[1] = _summarize(1, iouThr=.5, maxDets=self.params.maxDets[2])
-            stats[2] = _summarize(1, iouThr=.75, maxDets=self.params.maxDets[2])
+            stats[2] = _summarize(1, iouThr=.3, maxDets=self.params.maxDets[2])
             stats[3] = _summarize(1, areaRng='small', maxDets=self.params.maxDets[2])
             stats[4] = _summarize(1, areaRng='medium', maxDets=self.params.maxDets[2])
             stats[5] = _summarize(1, areaRng='large', maxDets=self.params.maxDets[2])
             stats[6] = _summarize(0, iouThr=.5, maxDets=self.params.maxDets[2])
-            stats[7] = _summarize(0, iouThr=.75, maxDets=self.params.maxDets[2])
+            stats[7] = _summarize(0, iouThr=.3, maxDets=self.params.maxDets[2])
             stats[8] = _summarize(0, maxDets=self.params.maxDets[0])
             stats[9] = _summarize(0, maxDets=self.params.maxDets[1])
             stats[10] = _summarize(0, maxDets=self.params.maxDets[2])
