@@ -31,6 +31,7 @@ class COCOeval_opt(COCOeval):
             print("useSegm (deprecated) is not None. Running {} evaluation".format(p.iouType))
         print("Evaluate annotation type *{}*".format(p.iouType))
         p.imgIds = list(np.unique(p.imgIds))
+        p.useCats = 0
         if p.useCats:
             p.catIds = list(np.unique(p.catIds))
         p.maxDets = sorted(p.maxDets)
@@ -77,8 +78,6 @@ class COCOeval_opt(COCOeval):
             for imgId in p.imgIds
         ]
         ious = [[self.ious[imgId, catId] for catId in catIds] for imgId in p.imgIds]
-
-        p.useCats = 0
 
         if not p.useCats:
             # For each image, flatten per-category lists into a single list
