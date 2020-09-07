@@ -78,6 +78,8 @@ class COCOeval_opt(COCOeval):
         ]
         ious = [[self.ious[imgId, catId] for catId in catIds] for imgId in p.imgIds]
 
+        p.useCats = 0
+
         if not p.useCats:
             # For each image, flatten per-category lists into a single list
             ground_truth_instances = [[[o for c in i for o in c]] for i in ground_truth_instances]
