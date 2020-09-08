@@ -31,7 +31,7 @@ class COCOeval_opt(COCOeval):
             print("useSegm (deprecated) is not None. Running {} evaluation".format(p.iouType))
         print("Evaluate annotation type *{}*".format(p.iouType))
         p.imgIds = list(np.unique(p.imgIds))
-        p.useCats = 0
+        # p.useCats = 0
         if p.useCats:
             p.catIds = list(np.unique(p.catIds))
         p.maxDets = sorted(p.maxDets)
@@ -84,7 +84,7 @@ class COCOeval_opt(COCOeval):
             ground_truth_instances = [[[o for c in i for o in c]] for i in ground_truth_instances]
             detected_instances = [[[o for c in i for o in c]] for i in detected_instances]
 
-        p.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
+        p.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
 
         # Call C++ implementation of self.evaluateImgs()
         self._evalImgs_cpp = _C.COCOevalEvaluateImages(
@@ -92,7 +92,7 @@ class COCOeval_opt(COCOeval):
         )
         self._evalImgs = None
 
-        self.params.iouThrs = np.linspace(.3, 0.95, int(np.round((0.95 - .3) / .05)) + 1, endpoint=True)
+        self.params.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
 
         self._paramsEval = copy.deepcopy(self.params)
         toc = time.time()
