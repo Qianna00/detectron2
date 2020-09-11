@@ -119,6 +119,7 @@ class RetinaNet(nn.Module):
         # Loss parameters:
         self.focal_loss_alpha         = cfg.MODEL.RETINANET.FOCAL_LOSS_ALPHA
         self.focal_loss_gamma         = cfg.MODEL.RETINANET.FOCAL_LOSS_GAMMA
+        self.cb_loss_beta             = cfg.MODEL.RETINANET.CB_LOSS_BETA
         self.smooth_l1_loss_beta      = cfg.MODEL.RETINANET.SMOOTH_L1_LOSS_BETA
         self.box_reg_loss_type        = cfg.MODEL.RETINANET.BBOX_REG_LOSS_TYPE
         # Inference parameters:
@@ -299,7 +300,6 @@ class RetinaNet(nn.Module):
         )"""
         unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
         samples_per_cls = torch.zeros(self.num_classes + 1, dtype=torch.int64).cuda()
-        print(count.dtype, samples_per_cls.dtype)
         samples_per_cls[unique_labels] = count
         loss_cls = CB_loss(
             gt_labels_target.to(pred_logits[0].dtype),
