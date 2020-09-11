@@ -302,7 +302,7 @@ class RetinaNet(nn.Module):
         samples_per_cls = torch.zeros(self.num_classes + 1, dtype=torch.int64).cuda()
         samples_per_cls[unique_labels] = count
         loss_cls = CB_loss(
-            gt_labels_target.to(pred_logits[0].dtype),
+            gt_labels_target,
             cat(pred_logits, dim=1)[valid_mask],
             samples_per_cls=samples_per_cls,
             no_of_classes=self.num_classes + 1,
