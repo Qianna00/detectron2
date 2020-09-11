@@ -284,12 +284,13 @@ class RetinaNet(nn.Module):
         ) * max(num_pos_anchors, 1)
 
         # classification and regression loss
-        """gt_labels_target = F.one_hot(gt_labels[valid_mask], num_classes=self.num_classes + 1)[
+        gt_labels_target = F.one_hot(gt_labels[valid_mask], num_classes=self.num_classes + 1)[
             :, :-1
         ]  # no loss for the last (background) class"""
+        print("gt_labels_target_shape:", gt_labels_target.dtype)
         gt_labels_target = gt_labels[valid_mask]
         print("gt_labels_target_shape:", gt_labels_target.shape)
-        gt_labels_target = gt_labels_target[gt_labels_target != 10]
+        # gt_labels_target = gt_labels_target[gt_labels_target != 10]
         print("gt_labels_target:", gt_labels_target)
         print("gt_labels_target_shape:", gt_labels_target.shape)
         """loss_cls = sigmoid_focal_loss_jit(
