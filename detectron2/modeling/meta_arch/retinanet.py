@@ -299,7 +299,7 @@ class RetinaNet(nn.Module):
             gamma=self.focal_loss_gamma,
             reduction="sum",
         )"""
-        print(cat(pred_logits, dim=1).shape)
+        print(pred_logits[0].shape)
         print(valid_mask.shape)
         print(cat(pred_logits, dim=1)[valid_mask].shape)
         unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
