@@ -290,6 +290,7 @@ class RetinaNet(nn.Module):
             :, :-1
         ]  # no loss for the last (background) class"""
         gt_labels_target = gt_labels[valid_mask]
+        print(gt_labels_target)
         # gt_labels_target = gt_labels_target[gt_labels_target != 10]
         """loss_cls = sigmoid_focal_loss_jit(
             cat(pred_logits, dim=1)[valid_mask],
