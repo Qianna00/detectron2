@@ -298,6 +298,8 @@ class RetinaNet(nn.Module):
             gamma=self.focal_loss_gamma,
             reduction="sum",
         )"""
+        print("pred_logits:", pred_logits)
+        print(pred_logits.shape)
         unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
         samples_per_cls = torch.zeros(self.num_classes, dtype=torch.int64).cuda()
         samples_per_cls[unique_labels] = count
