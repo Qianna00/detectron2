@@ -97,10 +97,7 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     # print(weights.shape)
     # print(weights.repeat(labels_one_hot.shape[0], 1).shape)
     weights = weights.repeat(labels_one_hot.shape[0], 1) * labels_one_hot
-    print(weights)
     weights = weights.sum(1)
-    print(weights)
-    print(weights.mean())
     weights = weights.unsqueeze(1)
     weights = weights.repeat(1, no_of_classes)
 
@@ -339,7 +336,7 @@ class RetinaNet(nn.Module):
             raise ValueError(f"Invalid bbox reg loss type '{self.box_reg_loss_type}'")
 
         return {
-            "loss_cls": loss_cls * 5,
+            "loss_cls": loss_cls,
             "loss_box_reg": loss_box_reg / self.loss_normalizer,
         }
 
