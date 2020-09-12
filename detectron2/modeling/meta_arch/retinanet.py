@@ -105,7 +105,7 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     weights = weights.repeat(1, no_of_classes)
 
     if loss_type == "focal":
-        cb_loss = focal_loss(labels_one_hot, logits, weights, gamma)
+        cb_loss = focal_loss(labels_one_hot[:, :-1], logits, weights, gamma)
     elif loss_type == "sigmoid":
         cb_loss = F.binary_cross_entropy_with_logits(input=logits, target=labels_one_hot, weights=weights)
     elif loss_type == "softmax":
