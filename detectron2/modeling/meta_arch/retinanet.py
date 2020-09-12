@@ -86,7 +86,10 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     weights = (1.0 - beta) / effective_num
     weights = weights / torch.sum(weights) * no_of_classes
 
-    labels_one_hot = F.one_hot(labels, no_of_classes).float()
+    labels_one_hot = F.one_hot(labels, no_of_classes + 1).float()
+    # print("labels_one_hot:", labels_one_hot.shape)
+    labels_one_hot = labels_one_hot[:, :-1]
+    # print("labels_one_hot:", labels_one_hot.shape)
 
     weights = torch.tensor(weights).float()
     weights = weights.unsqueeze(0)
@@ -289,8 +292,7 @@ class RetinaNet(nn.Module):
         """gt_labels_target = F.one_hot(gt_labels[valid_mask], num_classes=self.num_classes + 1)[
             :, :-1
         ]  # no loss for the last (background) class"""
-        gt_labels_target_ = gt_labels[valid_mask]
-        gt_labels_target = gt_labels_target_[gt_labels_target_ != 10]
+        gt_labels_target = gt_labels[valid_mask]
         """loss_cls = sigmoid_focal_loss_jit(
             cat(pred_logits, dim=1)[valid_mask],
             gt_labels_target.to(pred_logits[0].dtype),
@@ -299,8 +301,7 @@ class RetinaNet(nn.Module):
             reduction="sum",
         )"""
         pred_logits = cat(pred_logits, dim=1)[valid_mask]
-        pred_logits = pred_logits[gt_labels_target_ != 10]
-        unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
+        unique_labels, count = torch.unique(gt_labels_target[gt_labels_target != 10], return_counts=True)
         samples_per_cls = torch.zeros(self.num_classes, dtype=torch.int64).cuda()
         samples_per_cls[unique_labels] = count
         loss_cls = CB_loss(
