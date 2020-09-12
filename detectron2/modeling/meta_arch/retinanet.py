@@ -81,10 +81,13 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     Returns:
       cb_loss: A float tensor representing class balanced loss
     """
-    samples_per_cls[samples_per_cls == 0] = 1
+    zero_class_index = samples_per_cls == 0
+    print(zero_class_index)
+    samples_per_cls[zero_class_index] = 1
     beta = (samples_per_cls - 1.0) / samples_per_cls.float()
     effective_num = 1.0 - torch.pow(beta, samples_per_cls)
     weights = (1.0 - beta) / effective_num
+    weights[zero_class_index] = 0
     weights = weights / torch.sum(weights) * no_of_classes
 
     labels_one_hot = F.one_hot(labels, no_of_classes + 1).float()
