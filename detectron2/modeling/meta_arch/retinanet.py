@@ -99,7 +99,7 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     print(weights)
     weights = weights.sum(1)
     print(weights)
-    print(weights.mean)
+    print(weights.mean())
     weights = weights.unsqueeze(1)
     weights = weights.repeat(1, no_of_classes)
 
