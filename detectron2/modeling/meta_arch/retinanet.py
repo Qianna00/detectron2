@@ -86,17 +86,23 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     weights = (1.0 - beta) / effective_num
     weights = weights / torch.sum(weights) * no_of_classes
 
-    labels_one_hot = F.one_hot(labels, no_of_classes + 1).float()
+    labels_one_hot = F.one_hot(labels, no_of_classes).float()
     # print("labels_one_hot:", labels_one_hot.shape)
     labels_one_hot = labels_one_hot[:, :-1]
     # print("labels_one_hot:", labels_one_hot.shape)
 
     weights = torch.tensor(weights).float()
     weights = weights.unsqueeze(0)
+    print(weights.shape)
+    print(weights.repeat(labels_one_hot.shape[0], 1).shape)
     weights = weights.repeat(labels_one_hot.shape[0], 1) * labels_one_hot
+    print(weights.shape)
     weights = weights.sum(1)
+    print(weights.shape)
     weights = weights.unsqueeze(1)
+    print(weights.shape)
     weights = weights.repeat(1, no_of_classes)
+    print(weights.shape)
 
     if loss_type == "focal":
         cb_loss = focal_loss(labels_one_hot, logits, weights, gamma)
@@ -301,14 +307,14 @@ class RetinaNet(nn.Module):
             reduction="sum",
         )"""
         pred_logits = cat(pred_logits, dim=1)[valid_mask]
-        unique_labels, count = torch.unique(gt_labels_target[gt_labels_target != 10], return_counts=True)
-        samples_per_cls = torch.zeros(self.num_classes, dtype=torch.int64).cuda()
+        unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
+        samples_per_cls = torch.zeros(self.num_classes + 1, dtype=torch.int64).cuda()
         samples_per_cls[unique_labels] = count
         loss_cls = CB_loss(
             gt_labels_target,
             pred_logits,
             samples_per_cls=samples_per_cls,
-            no_of_classes=self.num_classes,
+            no_of_classes=self.num_classes + 1,
             loss_type="focal",
             beta=self.cb_loss_beta,
             gamma=self.focal_loss_gamma
