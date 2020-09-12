@@ -101,8 +101,6 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     # print(weights.repeat(labels_one_hot.shape[0], 1).shape)
     weights = weights.repeat(labels_one_hot.shape[0], 1) * labels_one_hot
     weights = weights.sum(1)
-    print(weights)
-    print(torch.sort(weights, descending=True))
     weights = weights.unsqueeze(1)
     weights = weights.repeat(1, no_of_classes)
 
