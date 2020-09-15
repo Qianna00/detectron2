@@ -295,18 +295,18 @@ class RetinaNet(nn.Module):
         ) * max(num_pos_anchors, 1)
 
         # classification and regression loss
-        gt_labels_target = F.one_hot(gt_labels[valid_mask], num_classes=self.num_classes + 1)[
+        """gt_labels_target = F.one_hot(gt_labels[valid_mask], num_classes=self.num_classes + 1)[
             :, :-1
-        ]  # no loss for the last (background) class"""
-        # gt_labels_target = gt_labels[valid_mask]
+        ]  # no loss for the last (background) class
         loss_cls = sigmoid_focal_loss_jit(
             cat(pred_logits, dim=1)[valid_mask],
             gt_labels_target.to(pred_logits[0].dtype),
             alpha=self.focal_loss_alpha,
             gamma=self.focal_loss_gamma,
             reduction="sum",
-        )
-        """pred_logits = cat(pred_logits, dim=1)[valid_mask]
+        )"""
+        gt_labels_target = gt_labels[valid_mask]
+        pred_logits = cat(pred_logits, dim=1)[valid_mask]
         unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
         samples_per_cls = torch.zeros(self.num_classes + 1, dtype=torch.int64).cuda()
         samples_per_cls[unique_labels] = count
@@ -318,7 +318,7 @@ class RetinaNet(nn.Module):
             loss_type="focal",
             beta=self.cb_loss_beta,
             gamma=self.focal_loss_gamma
-        )"""
+        )
 
         if self.box_reg_loss_type == "smooth_l1":
             loss_box_reg = smooth_l1_loss(
@@ -339,7 +339,7 @@ class RetinaNet(nn.Module):
             raise ValueError(f"Invalid bbox reg loss type '{self.box_reg_loss_type}'")
 
         return {
-            "loss_cls": loss_cls / self.loss_normalizer,
+            "loss_cls": loss_cls,
             "loss_box_reg": loss_box_reg / self.loss_normalizer,
         }
 
