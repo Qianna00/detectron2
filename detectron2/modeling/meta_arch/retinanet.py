@@ -88,7 +88,7 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     effective_num = 1.0 - torch.pow(beta, samples_per_cls)
     weights = (1.0 - beta) / effective_num
     weights[zero_class_index] = 0
-    weights = weights / torch.sum(weights) * no_of_classes
+    weights = weights / torch.sum(weights) * (no_of_classes - weights[zero_class_index].shape[0])
 
     labels_one_hot = F.one_hot(labels, no_of_classes).float()
     # print("labels_one_hot:", labels_one_hot.shape)
