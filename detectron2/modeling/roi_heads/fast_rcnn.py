@@ -235,7 +235,7 @@ class FastRCNNOutputs:
                 assert proposals[0].has("gt_classes")
                 self.gt_classes = cat([p.gt_classes for p in proposals], dim=0)
             print("gt_classes:", self.gt_classes)
-            print("gt_classes_shape:", self.gt_classes.shape)
+            print("gt_classes_shape:", self.gt_classes[self.gt_classes == 10].shape)
         else:
             self.proposals = Boxes(torch.zeros(0, 4, device=self.pred_proposal_deltas.device))
         self._no_instances = len(proposals) == 0  # no instances found
