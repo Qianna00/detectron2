@@ -218,6 +218,7 @@ class FastRCNNOutputs:
         self.pred_proposal_deltas = pred_proposal_deltas
         self.smooth_l1_beta = smooth_l1_beta
         self.box_reg_loss_type = box_reg_loss_type
+        self.num_classes = 11
 
         self.image_shapes = [x.image_size for x in proposals]
 
@@ -234,8 +235,6 @@ class FastRCNNOutputs:
                 self.gt_boxes = box_type.cat([p.gt_boxes for p in proposals])
                 assert proposals[0].has("gt_classes")
                 self.gt_classes = cat([p.gt_classes for p in proposals], dim=0)
-            print("gt_classes:", self.gt_classes)
-            print("gt_classes_shape:", self.gt_classes[self.gt_classes == 10].shape)
         else:
             self.proposals = Boxes(torch.zeros(0, 4, device=self.pred_proposal_deltas.device))
         self._no_instances = len(proposals) == 0  # no instances found
@@ -282,7 +281,29 @@ class FastRCNNOutputs:
             return 0.0 * self.pred_class_logits.sum()
         else:
             self._log_accuracy()
-            return F.cross_entropy(self.pred_class_logits, self.gt_classes, reduction="mean")
+            unique_labels, count = torch.unique(self.gt_classes, return_counts=True)
+            samples_per_cls = torch.zeros(self.num_classes, dtype=torch.int64).cuda()
+            samples_per_cls[unique_labels] = count
+            zero_class_index = samples_per_cls == 0
+            # print(zero_class_index)
+            samples_per_cls[zero_class_index] = 1
+            beta = (samples_per_cls - 1.0) / samples_per_cls.float()
+            effective_num = 1.0 - torch.pow(beta, samples_per_cls)
+            weights = (1.0 - beta) / effective_num
+            weights[zero_class_index] = 0
+            weights = weights / torch.sum(weights) * (self.num_classes - weights[zero_class_index].shape[0])
+            labels_one_hot = F.one_hot(self.gt_classes, self.num_classes).float()
+
+            weights = torch.tensor(weights).float()
+            weights = weights.unsqueeze(0)
+            # print(weights.shape)
+            # print(weights.repeat(labels_one_hot.shape[0], 1).shape)
+            weights = weights.repeat(labels_one_hot.shape[0], 1) * labels_one_hot
+            weights = weights.sum(1)
+            weights = weights.unsqueeze(1)
+            weights = weights.repeat(1, self.num_classes)
+
+            return F.cross_entropy(self.pred_class_logits, self.gt_classes, weights=weights)
 
     def box_reg_loss(self):
         """
@@ -373,7 +394,7 @@ class FastRCNNOutputs:
         Returns:
             A dict of losses (scalar tensors) containing keys "loss_cls" and "loss_box_reg".
         """
-        return {"loss_cls": self.softmax_cross_entropy_loss(), "loss_box_reg": self.box_reg_loss()}
+        return {"loss_cls": self.cb_softmax_ce_loss(), "loss_box_reg": self.box_reg_loss()}
 
     def predict_boxes(self):
         """
