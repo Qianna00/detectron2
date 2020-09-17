@@ -303,7 +303,7 @@ class FastRCNNOutputs:
             weights = weights.unsqueeze(1)
             weights = weights.repeat(1, self.num_classes)
 
-            return F.cross_entropy(self.pred_class_logits, self.gt_classes, weights=weights)
+            return F.cross_entropy(self.pred_class_logits, self.gt_classes, weight=weights)
 
     def box_reg_loss(self):
         """
