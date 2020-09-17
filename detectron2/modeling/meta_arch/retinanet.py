@@ -90,7 +90,7 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     weights[zero_class_index] = 0
     weights = weights / torch.sum(weights) * (no_of_classes - weights[zero_class_index].shape[0])
 
-    labels_one_hot = F.one_hot(labels, no_of_classes).float()
+    labels_one_hot = F.one_hot(labels, no_of_classes + 1).float()
     # print("labels_one_hot:", labels_one_hot.shape)
     # labels_one_hot = labels_one_hot[:, :-1]
     # print("labels_one_hot:", labels_one_hot.shape)
@@ -105,7 +105,7 @@ def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gam
     weights = weights.repeat(1, no_of_classes)
 
     if loss_type == "focal":
-        cb_loss = focal_loss(labels_one_hot, logits, weights, gamma)
+        cb_loss = focal_loss(labels_one_hot[:, :-1], logits, weights, gamma)
     elif loss_type == "sigmoid":
         cb_loss = F.binary_cross_entropy_with_logits(input=logits, target=labels_one_hot, weights=weights)
     elif loss_type == "softmax":
@@ -305,12 +305,12 @@ class RetinaNet(nn.Module):
             gamma=self.focal_loss_gamma,
             reduction="sum",
         )"""
-        gt_labels_target_ = gt_labels[valid_mask]
-        gt_labels_target = gt_labels_target_[gt_labels_target_ != 10]
+        gt_labels_target = gt_labels[valid_mask]
+        # gt_labels_target = gt_labels_target_[gt_labels_target_ != 10]
         pred_logits = cat(pred_logits, dim=1)[valid_mask]
-        pred_logits = pred_logits[gt_labels_target_ != 10]
+        # pred_logits = pred_logits[gt_labels_target_ != 10]
         unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
-        samples_per_cls = torch.zeros(self.num_classes, dtype=torch.int64).cuda()
+        samples_per_cls = torch.zeros(self.num_classes + 1, dtype=torch.int64).cuda()
         samples_per_cls[unique_labels] = count
         loss_cls = CB_loss(
             gt_labels_target,
