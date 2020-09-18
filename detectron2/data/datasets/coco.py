@@ -90,7 +90,7 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
     # sort indices for reproducible results
     # img_ids = sorted(coco_api.imgs.keys())
     # print(coco_api.catToImgs)
-    print(coco_api.getImgIds(cat_ids=[1]))
+    print(coco_api.getImgIds(catIds=[1]))
     img_ids = sorted(coco_api.getImgIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
     # print(img_ids)
     # imgs is a list of dicts, each looks something like:
