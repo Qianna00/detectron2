@@ -3,6 +3,7 @@ import copy
 import numpy as np
 import time
 from pycocotools.cocoeval import COCOeval
+from collections import defaultdict
 
 from detectron2 import _C
 
@@ -35,6 +36,11 @@ class COCOeval_opt(COCOeval):
         if p.useCats:
             p.catIds = list(np.unique(p.catIds))
         p.maxDets = sorted(p.maxDets)
+
+        # modify the catIds and imgIds for 7-class smd detection
+        p.catIds = [1, 2, 3, 4, 5, 6, 7]
+        p.imgIds = sorted(self.cocoGt.getImgIds(catIds=p.catIds))
+
         self.params = p
 
         self._prepare()
