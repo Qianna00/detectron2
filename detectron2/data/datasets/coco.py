@@ -62,7 +62,7 @@ def load_coco_json(json_file, image_root, dataset_name=None, extra_annotation_ke
     id_map = None
     if dataset_name is not None:
         meta = MetadataCatalog.get(dataset_name)
-        cat_ids = sorted(coco_api.getCatIds())
+        cat_ids = sorted(coco_api.getCatIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
         cats = coco_api.loadCats(cat_ids)
         # The categories in a custom json file may not be sorted.
         thing_classes = [c["name"] for c in sorted(cats, key=lambda x: x["id"])]
@@ -87,7 +87,8 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
         meta.thing_dataset_id_to_contiguous_id = id_map
 
     # sort indices for reproducible results
-    img_ids = sorted(coco_api.imgs.keys())
+    # img_ids = sorted(coco_api.imgs.keys())
+    img_ids = sorted(coco_api.getImgIds(catIds=cat_ids))
     # imgs is a list of dicts, each looks something like:
     # {'license': 4,
     #  'url': 'http://farm6.staticflickr.com/5454/9413846304_881d5e5c3b_z.jpg',

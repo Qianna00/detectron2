@@ -312,6 +312,7 @@ class RetinaNet(nn.Module):
         unique_labels, count = torch.unique(gt_labels_target, return_counts=True)
         samples_per_cls = torch.zeros(self.num_classes + 1, dtype=torch.int64).cuda()
         samples_per_cls[unique_labels] = count
+        # samples_per_cls = torch.Tensor([2632, 551, 42497, 2834, 739, 2157, 964, 0, 103, 4292])
         loss_cls = CB_loss(
             gt_labels_target,
             pred_logits,
