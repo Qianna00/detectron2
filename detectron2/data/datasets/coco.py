@@ -65,7 +65,6 @@ def load_coco_json(json_file, image_root, dataset_name=None, extra_annotation_ke
         cat_ids = sorted(coco_api.getCatIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
         # print(cat_ids)
         cats = coco_api.loadCats(cat_ids)
-        print(cats)
         # The categories in a custom json file may not be sorted.
         thing_classes = [c["name"] for c in sorted(cats, key=lambda x: x["id"])]
         meta.thing_classes = thing_classes
@@ -90,6 +89,7 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
 
     # sort indices for reproducible results
     # img_ids = sorted(coco_api.imgs.keys())
+    print(coco_api.catToImgs)
     img_ids = sorted(coco_api.getImgIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
     print(img_ids)
     # imgs is a list of dicts, each looks something like:
