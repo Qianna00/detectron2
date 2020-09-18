@@ -284,6 +284,7 @@ class FastRCNNOutputs:
             unique_labels, count = torch.unique(self.gt_classes, return_counts=True)
             samples_per_cls = torch.zeros(self.num_classes, dtype=torch.int64).cuda()
             samples_per_cls[unique_labels] = count
+            # samples_per_cls = torch.Tensor([2632, 551, 42497, 2834, 739, 2157, 964, 0, 103, 4292])
             zero_class_index = samples_per_cls == 0
             # print(zero_class_index)
             samples_per_cls[zero_class_index] = 1
@@ -394,7 +395,7 @@ class FastRCNNOutputs:
         Returns:
             A dict of losses (scalar tensors) containing keys "loss_cls" and "loss_box_reg".
         """
-        return {"loss_cls": self.cb_softmax_ce_loss(), "loss_box_reg": self.box_reg_loss()}
+        return {"loss_cls": self.softmax_cross_entropy_loss(), "loss_box_reg": self.box_reg_loss()}
 
     def predict_boxes(self):
         """
