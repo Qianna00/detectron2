@@ -292,7 +292,7 @@ class FastRCNNOutputs:
             weights = (1.0 - beta) / effective_num
             weights[zero_class_index] = 0
             weights = weights / torch.sum(weights) * (self.num_classes - weights[zero_class_index].shape[0])
-            """labels_one_hot = F.one_hot(self.gt_classes, self.num_classes).float()
+            labels_one_hot = F.one_hot(self.gt_classes, self.num_classes).float()
 
             weights = torch.tensor(weights).float()
             weights = weights.unsqueeze(0)
@@ -301,9 +301,9 @@ class FastRCNNOutputs:
             weights = weights.repeat(labels_one_hot.shape[0], 1) * labels_one_hot
             weights = weights.sum(1)
             weights = weights.unsqueeze(1)
-            weights = weights.repeat(1, self.num_classes)"""
+            weights = weights.repeat(1, self.num_classes)
 
-            return F.cross_entropy(self.pred_class_logits, self.gt_classes, weight=weights)
+            return F.binary_cross_entropy_with_logits(self.pred_class_logits, labels_one_hot, weight=weights)
 
     def box_reg_loss(self):
         """
