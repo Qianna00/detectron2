@@ -302,6 +302,7 @@ class FastRCNNOutputs:
             weights = weights.sum(1)
             weights = weights.unsqueeze(1)
             weights = weights.repeat(1, self.num_classes)
+            print(self.pred_class_logits.shape, labels_one_hot.shape)
 
             return F.binary_cross_entropy(self.pred_class_logits, labels_one_hot, weight=weights)
 
