@@ -90,8 +90,15 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
     # sort indices for reproducible results
     # img_ids = sorted(coco_api.imgs.keys())
     # print(coco_api.catToImgs)
-    print(coco_api.getImgIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
-    img_ids = sorted(coco_api.getImgIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
+    # print(coco_api.getImgIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
+    img_ids = []
+    for i, cat_id in enumerate(cat_ids):
+        if i == 0 and len(img_ids) == 0:
+            img_ids = set(coco_api.getImgIds(catIds=i))
+        else:
+            img_ids |= set(coco_api.getImgIds(catIds=[i]))
+    img_ids = sorted(img_ids)
+    # img_ids = sorted(coco_api.getImgIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
     # print(img_ids)
     # imgs is a list of dicts, each looks something like:
     # {'license': 4,
