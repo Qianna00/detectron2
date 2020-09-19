@@ -124,7 +124,8 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
     #   'category_id': 16,
     #   'id': 42986},
     #  ...]
-    anns = [coco_api.imgToAnns[img_id] for img_id in img_ids]
+    # anns = [coco_api.imgToAnns[img_id] for img_id in img_ids]
+    anns = coco_api.getAnnIds(imgIds=img_ids, catIds=cat_ids)
 
     if "minival" not in json_file:
         # The popular valminusminival & minival annotations for COCO2014 contain this bug.
