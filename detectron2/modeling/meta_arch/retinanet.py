@@ -128,7 +128,7 @@ class RetinaNet(nn.Module):
         # Loss parameters:
         self.focal_loss_alpha         = cfg.MODEL.RETINANET.FOCAL_LOSS_ALPHA
         self.focal_loss_gamma         = cfg.MODEL.RETINANET.FOCAL_LOSS_GAMMA
-        self.cb_loss_beta             = cfg.MODEL.RETINANET.CB_LOSS_BETA
+        # self.cb_loss_beta             = cfg.MODEL.RETINANET.CB_LOSS_BETA
         self.smooth_l1_loss_beta      = cfg.MODEL.RETINANET.SMOOTH_L1_LOSS_BETA
         self.box_reg_loss_type        = cfg.MODEL.RETINANET.BBOX_REG_LOSS_TYPE
         # Inference parameters:
@@ -295,7 +295,7 @@ class RetinaNet(nn.Module):
         ) * max(num_pos_anchors, 1)
 
         # classification and regression loss
-        """gt_labels_target = F.one_hot(gt_labels[valid_mask], num_classes=self.num_classes + 1)[
+        gt_labels_target = F.one_hot(gt_labels[valid_mask], num_classes=self.num_classes + 1)[
             :, :-1
         ]  # no loss for the last (background) class
         loss_cls = sigmoid_focal_loss_jit(
@@ -304,8 +304,8 @@ class RetinaNet(nn.Module):
             alpha=self.focal_loss_alpha,
             gamma=self.focal_loss_gamma,
             reduction="sum",
-        )"""
-        gt_labels_target = gt_labels[valid_mask]
+        )
+        """gt_labels_target = gt_labels[valid_mask]
         # gt_labels_target = gt_labels_target_[gt_labels_target_ != 10]
         pred_logits = cat(pred_logits, dim=1)[valid_mask]
         # pred_logits = pred_logits[gt_labels_target_ != 10]
@@ -321,7 +321,7 @@ class RetinaNet(nn.Module):
             loss_type="focal",
             beta=self.cb_loss_beta,
             gamma=self.focal_loss_gamma
-        )
+        )"""
 
         if self.box_reg_loss_type == "smooth_l1":
             loss_box_reg = smooth_l1_loss(
