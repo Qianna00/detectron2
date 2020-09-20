@@ -342,7 +342,7 @@ class RetinaNet(nn.Module):
             raise ValueError(f"Invalid bbox reg loss type '{self.box_reg_loss_type}'")
 
         return {
-            "loss_cls": loss_cls,
+            "loss_cls": loss_cls / self.loss_normalizer,
             "loss_box_reg": loss_box_reg / self.loss_normalizer,
         }
 
