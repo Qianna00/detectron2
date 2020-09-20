@@ -83,6 +83,7 @@ class COCOeval_opt(COCOeval):
             [convert_instances_to_cpp(self._dts[imgId, catId], is_det=True) for catId in p.catIds]
             for imgId in p.imgIds
         ]
+        print(catIds, p.imgIds)
         ious = [[self.ious[imgId, catId] for catId in catIds] for imgId in p.imgIds]
         print("ious:", ious)
 
