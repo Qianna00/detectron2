@@ -84,6 +84,7 @@ class COCOeval_opt(COCOeval):
             for imgId in p.imgIds
         ]
         ious = [[self.ious[imgId, catId] for catId in catIds] for imgId in p.imgIds]
+        print("ious:", ious)
 
         if not p.useCats:
             # For each image, flatten per-category lists into a single list
