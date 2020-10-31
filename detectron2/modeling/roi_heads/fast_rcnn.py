@@ -43,52 +43,6 @@ Naming convention:
 """
 
 
-def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gamma):
-    """Compute the Class Balanced Loss between `logits` and the ground truth `labels`.
-    Class Balanced Loss: ((1-beta)/(1-beta^n))*Loss(labels, logits)
-    where Loss is one of the standard losses used for Neural Networks.
-    Args:
-      labels: A int tensor of size [batch].
-      logits: A float tensor of size [batch, no_of_classes].
-      samples_per_cls: A python list of size [no_of_classes].
-      no_of_classes: total number of classes. int
-      loss_type: string. One of "sigmoid", "focal", "softmax".
-      beta: float. Hyperparameter for Class balanced loss.
-      gamma: float. Hyperparameter for Focal loss.
-    Returns:
-      cb_loss: A float tensor representing class balanced loss
-    """
-    zero_class_index = samples_per_cls == 0
-    # print(zero_class_index)
-    samples_per_cls[zero_class_index] = 1
-    beta = (samples_per_cls - 1.0) / samples_per_cls.float()
-    effective_num = 1.0 - torch.pow(beta, samples_per_cls)
-    weights = (1.0 - beta) / effective_num
-    weights[zero_class_index] = 0
-    weights = weights / torch.sum(weights) * no_of_classes
-
-    labels_one_hot = F.one_hot(labels, no_of_classes + 1).float()
-    # print("labels_one_hot:", labels_one_hot.shape)
-    # labels_one_hot = labels_one_hot[:, :-1]
-    # print("labels_one_hot:", labels_one_hot.shape)
-
-    weights = torch.tensor(weights).float()
-    weights = weights.unsqueeze(0)
-    # print(weights.shape)
-    # print(weights.repeat(labels_one_hot.shape[0], 1).shape)
-    weights = weights.repeat(labels_one_hot.shape[0], 1) * labels_one_hot
-    weights = weights.sum(1)
-    weights = weights.unsqueeze(1)
-    weights = weights.repeat(1, no_of_classes)
-
-    if loss_type == "sigmoid":
-        cb_loss = F.binary_cross_entropy_with_logits(input=logits, target=labels_one_hot, weights=weights)
-    elif loss_type == "softmax":
-        pred = logits.softmax(dim=1)
-        cb_loss = F.binary_cross_entropy(input=pred, target=labels_one_hot, weight=weights)
-    return cb_loss
-
-
 def fast_rcnn_inference(boxes, scores, image_shapes, score_thresh, nms_thresh, topk_per_image):
     """
     Call `fast_rcnn_inference_single_image` for all images.
