@@ -38,14 +38,14 @@ class COCOeval_opt(COCOeval):
         p.maxDets = sorted(p.maxDets)
 
         # modify the catIds and imgIds for 7-class smd detection
-        p.catIds = [1, 2, 3, 4, 5, 6, 7]
+        """p.catIds = [1, 2, 3, 4, 5, 6, 7]
         img_ids = []
         for i, cat_id in enumerate(p.catIds):
             if i == 0 and len(img_ids) == 0:
                 img_ids = set(self.cocoGt.getImgIds(catIds=i))
             else:
                 img_ids |= set(self.cocoGt.getImgIds(catIds=[i]))
-        p.imgIds = sorted(img_ids)
+        p.imgIds = sorted(img_ids)"""
         # p.imgIds = sorted(self.cocoGt.getImgIds(catIds=p.catIds))
 
         self.params = p
