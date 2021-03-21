@@ -20,7 +20,7 @@ register_coco_instances("smd_train", {}, "/root/data/zq/data/SMD/annotations/Tra
                         "/root/data/zq/data/SMD/train")
 register_coco_instances("smd_val", {}, "/root/data/zq/data/SMD/annotations/Training/SMD_VIS_skip_2_val.json",
                         "/root/data/zq/data/SMD/train")
-register_coco_instances("smd_test", {}, "/root/data/zq/data/SMD/annotations/Test/SMD_VIS_skip_2.json",
+register_coco_instances("smd_test", {}, "/root/data/zq/data/SMD/annotations/Test/SMD_VIS_skip_10.json",
                         "/root/data/zq/data/SMD/test")
 
 
