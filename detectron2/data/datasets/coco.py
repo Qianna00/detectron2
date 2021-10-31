@@ -63,6 +63,7 @@ def load_coco_json(json_file, image_root, dataset_name=None, extra_annotation_ke
     if dataset_name is not None:
         meta = MetadataCatalog.get(dataset_name)
         cat_ids = sorted(coco_api.getCatIds())
+        print(cat_ids)
         # cat_ids = sorted(coco_api.getCatIds(catIds=[1, 2, 3, 4, 5, 6, 7]))
         # print(cat_ids)
         cats = coco_api.loadCats(cat_ids)
